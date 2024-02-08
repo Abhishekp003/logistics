@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'next.dart';
 import 'truck.dart';
+
 
 class ConfirmationPage extends StatelessWidget {
   final String selectedGoodsType;
@@ -8,6 +10,10 @@ class ConfirmationPage extends StatelessWidget {
   final TimeOfDay selectedTime;
   final Truck selectedTruck;
   final String selectedImageName;
+  final String enteredName;
+  final String phoneNumber;
+  final String fromLocation; // Added parameter for from location
+  final String toLocation; // Added parameter for to location
 
   // Define a custom color for the outlined boxes
   final Color outlinedBoxColor = Colors.orange;
@@ -19,7 +25,43 @@ class ConfirmationPage extends StatelessWidget {
     required this.selectedTime,
     required this.selectedTruck,
     required this.selectedImageName,
+    required this.enteredName,
+    required this.phoneNumber,
+    required this.fromLocation,
+    required this.toLocation,
   });
+
+  void _confirmPickup(BuildContext context) async {
+    try {
+      // Construct the data to be stored in Firebase
+      Map<String, dynamic> pickupData = {
+        'selectedGoodsType': selectedGoodsType,
+        'selectedDate': selectedDate,
+        'selectedTime': selectedTime.toString(), // Updated to use toString() method
+        'selectedTruck': {
+          'name': selectedTruck?.name ?? '',
+          'price': selectedTruck?.price ?? 0,
+          'weightCapacity': selectedTruck?.weightCapacity ?? 0,
+        },
+        'fromLocation': fromLocation ?? '', // Store from location, default to empty string if null
+        'toLocation': toLocation ?? '', // Store to location, default to empty string if null
+        // Add any other relevant data fields here
+      };
+
+      // Store the data in Firebase Firestore
+      await FirebaseFirestore.instance.collection('confirmed_pickups').add(pickupData);
+      print('Data stored in Firebase successfully');
+
+      // Navigate to the next screen
+      Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => NextScreen()));
+    }
+    catch (e) {
+      print('Error storing data in Firebase: $e');
+      // Handle the error as needed
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +136,6 @@ class ConfirmationPage extends StatelessWidget {
                   ),
                   SizedBox(height: 16.0),
                   Divider(color: outlinedBoxColor), // Divider below the box
-
                   SizedBox(height: 8.0),
                   Row(
                     children: [
@@ -175,7 +216,21 @@ class ConfirmationPage extends StatelessWidget {
                   ),
                   Divider(color: outlinedBoxColor), // Divider below date and time
                   SizedBox(height: 8.0),
-                  buildBoxTextFieldWithIcon('${selectedGoodsType}', Icons.shopping_bag),
+                  Text(
+                    'From Location:',
+                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8.0),
+                  buildBoxTextFieldWithIcon(fromLocation, Icons.location_on),
+                  SizedBox(height: 16.0),
+                  Text(
+                    'To Location:',
+                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8.0),
+                  buildBoxTextFieldWithIcon(toLocation, Icons.location_on),
+                  Divider(color: outlinedBoxColor), // Divider below "to" location
+                  SizedBox(height: 8.0),
                 ],
               ),
             ),
@@ -185,9 +240,7 @@ class ConfirmationPage extends StatelessWidget {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
-          onPressed: () {
-            // Implement any action on the confirmation page button press
-          },
+          onPressed: () => _confirmPickup(context),
           style: ElevatedButton.styleFrom(
             primary: Colors.black,
             onPrimary: Colors.white,
@@ -218,9 +271,14 @@ class ConfirmationPage extends StatelessWidget {
               size: 20.0,
             ),
             SizedBox(width: 8.0),
-            Text(
-              labelText,
-              style: TextStyle(fontSize: 16.0),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Text(
+                  labelText,
+                  style: TextStyle(fontSize: 16.0),
+                ),
+              ),
             ),
           ],
         ),

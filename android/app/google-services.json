@@ -1,51 +1,13 @@
 {
   "project_info": {
-    "project_number": "317818174779",
-    "project_id": "transmaa-9fa8e",
-    "storage_bucket": "transmaa-9fa8e.appspot.com"
+    "project_number": "1038181647217",
+    "project_id": "transmalogi",
+    "storage_bucket": "transmalogi.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:317818174779:android:65592047e9b60931660b1e",
-        "android_client_info": {
-          "package_name": "com.example.customer"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCjK6C4Celx1bB8Ty6vemK-7d7TUlnfgyo"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:317818174779:android:1f28ce5e3cf09820660b1e",
-        "android_client_info": {
-          "package_name": "com.example.demo"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCjK6C4Celx1bB8Ty6vemK-7d7TUlnfgyo"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:317818174779:android:48b4dabd60b54eb7660b1e",
+        "mobilesdk_app_id": "1:1038181647217:android:f545fcf7f2fc837dd8acd0",
         "android_client_info": {
           "package_name": "com.example.logistics"
         }
@@ -53,64 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCjK6C4Celx1bB8Ty6vemK-7d7TUlnfgyo"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:317818174779:android:1031d9aecf558d60660b1e",
-        "android_client_info": {
-          "package_name": "com.example.splash_screen"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCjK6C4Celx1bB8Ty6vemK-7d7TUlnfgyo"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:317818174779:android:bed76db45b089187660b1e",
-        "android_client_info": {
-          "package_name": "com.example.transmaa_drivers1"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCjK6C4Celx1bB8Ty6vemK-7d7TUlnfgyo"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:317818174779:android:415bf84657b51323660b1e",
-        "android_client_info": {
-          "package_name": "com.example.transmaacode"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCjK6C4Celx1bB8Ty6vemK-7d7TUlnfgyo"
+          "current_key": "AIzaSyBlSo5SgRAstaWpyaJYuznIBLgIE-fzW_o"
         }
       ],
       "services": {

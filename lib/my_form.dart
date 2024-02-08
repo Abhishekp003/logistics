@@ -2,11 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'confirmation_page.dart';
 import 'truck.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
-import 'dart:io';
 
 class MyForm extends StatefulWidget {
+  final String enteredName;
+  final String phoneNumber;
+  final String fromLocation;
+  final String toLocation;
+
+  const MyForm({
+    Key? key,
+    required this.enteredName,
+    required this.phoneNumber,
+    required this.fromLocation,
+    required this.toLocation,
+  }) : super(key: key);
+
   @override
   _MyFormState createState() => _MyFormState();
 }
@@ -23,7 +33,6 @@ class _MyFormState extends State<MyForm> {
   List<String> goodsList = [
     'Timber/Plywood/Laminate',
     'Electrical/Electronics/Home Appliances',
-    'Date & Time',
     'General',
     'Building/Construction',
     'Catering/Restaurant/Event Management',
@@ -181,52 +190,7 @@ class _MyFormState extends State<MyForm> {
     });
   }
 
-  Future<void> _bookPickup() async {
-    if (selectedTruck != null) {
-      File imageFile = File(selectedTruck!.imagePath);
-      String imageUrl = await uploadImage(imageFile);
-
-      // Create a map with the data to be stored in the database
-      Map<String, dynamic> pickupData = {
-        'selectedGoodsType': selectedGoodsType,
-        'selectedDate': Timestamp.fromDate(selectedDate!),
-        'selectedTime': selectedTime!.format(context),
-        'selectedTruck': {
-          'name': selectedTruck!.name,
-          'price': selectedTruck!.price,
-          'weightCapacity': selectedTruck!.weightCapacity,
-        },
-        'imageUrl': imageUrl,
-      };
-
-      // Store data in the database
-      try {
-        await FirebaseFirestore.instance.collection('pickup_requests').add(pickupData);
-        print('Data stored in the database successfully');
-      } catch (e) {
-        print('Error storing data in the database: $e');
-        // Handle the error as needed
-      }
-    }
-  }
-
-  Future<String> uploadImage(File imageFile) async {
-    try {
-      String imageName = 'pickup_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      firebase_storage.Reference storageReference =
-      firebase_storage.FirebaseStorage.instance.ref().child('pickup_images/$imageName');
-      await storageReference.putFile(imageFile);
-      String imageUrl = await storageReference.getDownloadURL();
-      return imageUrl;
-    } catch (e) {
-      print('Error uploading image: $e');
-      return ''; // Return an empty string or handle the error as needed
-    }
-  }
-
   void _navigateToConfirmationPage() {
-    _bookPickup(); // Call the _bookPickup method before navigating to the confirmation page
-
     if (selectedTruck != null) {
       Navigator.push(
         context,
@@ -237,6 +201,10 @@ class _MyFormState extends State<MyForm> {
             selectedTime: selectedTime!,
             selectedTruck: selectedTruck!,
             selectedImageName: selectedTruck!.imagePath,
+            enteredName: widget.enteredName,
+            phoneNumber: widget.phoneNumber,
+            fromLocation: widget.fromLocation,
+            toLocation: widget.toLocation,
           ),
         ),
       );
@@ -245,220 +213,207 @@ class _MyFormState extends State<MyForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView(
-        scrollDirection: Axis.vertical,
-        children: [
-          Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Booking Form'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            Text(
+              'Select Date and Time',
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 8),
+            Row(
               children: [
-                Text(
-                  'Select Date and Time',
-                  style: TextStyle(fontSize: 16),
-                ),
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                Expanded(
+                  child: InkWell(
+                    onTap: () => _selectDate(context),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.orangeAccent),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      child: selectedDate == null
+                          ? Row(
                         children: [
-                          InkWell(
-                            onTap: () => _selectDate(context),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.orangeAccent),
-                                borderRadius: BorderRadius.circular(5.0),
-                              ),
-                              child: selectedDate == null
-                                  ? Row(
-                                children: [
-                                  Icon(Icons.calendar_today, color: Colors.grey),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Select Date',
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                ],
-                              )
-                                  : Row(
-                                children: [
-                                  Icon(Icons.calendar_today, color: Colors.black),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
-                                  ),
-                                ],
-                              ),
-                            ),
+                          Icon(Icons.calendar_today, color: Colors.grey),
+                          SizedBox(width: 8),
+                          Text(
+                            'Select Date',
+                            style: TextStyle(color: Colors.grey),
                           ),
                         ],
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      )
+                          : Row(
                         children: [
-                          InkWell(
-                            onTap: () => _selectTime(context),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.orangeAccent),
-                                borderRadius: BorderRadius.circular(5.0),
-                              ),
-                              child: selectedTime == null
-                                  ? Row(
-                                children: [
-                                  Icon(Icons.access_time, color: Colors.grey),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Select Time',
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                ],
-                              )
-                                  : Row(
-                                children: [
-                                  Icon(Icons.access_time, color: Colors.black),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    selectedTime!.format(context),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16.0),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.orangeAccent),
-                          borderRadius: BorderRadius.circular(5.0),
-                        ),
-                        child: DropdownButtonFormField<String>(
-                          isExpanded: true,
-                          value: selectedGoodsType,
-                          items: goodsList.map((goods) {
-                            return DropdownMenuItem<String>(
-                              value: goods,
-                              child: Text(goods),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedGoodsType = value;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            labelText: 'Goods Type',
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16.0),
-                Center(
-                  child: Text(
-                    'Choose Trucks',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16.0),
-                for (int index = 0; index < trucks.length; index++)
-                  Container(
-                    margin: EdgeInsets.only(bottom: 8.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _showPopup(context, index);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        primary: selectedTruck == trucks[index] ? Colors.grey : Colors.white,
-                        onPrimary: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Column(
-                            children: [
-                              Image.asset(
-                                trucks[index].imagePath,
-                                height: 60.0,
-                                width: 120.0,
-                                fit: BoxFit.cover,
-                              ),
-                              SizedBox(height: 4.0),
-                              Text(
-                                trucks[index].name,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(width: 8.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Price: \$${trucks[index].price.toString()}',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              Text(
-                                'Capacity: ${trucks[index].weightCapacity.toString()} Tons',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
+                          Icon(Icons.calendar_today, color: Colors.black),
+                          SizedBox(width: 8),
+                          Text(
+                            '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
                           ),
                         ],
                       ),
                     ),
                   ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: InkWell(
+                    onTap: () => _selectTime(context),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.orangeAccent),
+                        borderRadius: BorderRadius.circular(5.0),
+                      ),
+                      child: selectedTime == null
+                          ? Row(
+                        children: [
+                          Icon(Icons.access_time, color: Colors.grey),
+                          SizedBox(width: 8),
+                          Text(
+                            'Select Time',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      )
+                          : Row(
+                        children: [
+                          Icon(Icons.access_time, color: Colors.black),
+                          SizedBox(width: 8),
+                          Text(
+                            selectedTime!.format(context),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
-          SizedBox(height: 16.0),
-          ElevatedButton(
-            onPressed: () {
-              _navigateToConfirmationPage();
-            },
-            style: ElevatedButton.styleFrom(
-              primary: Colors.black,
-              onPrimary: Colors.white,
+            SizedBox(height: 16.0),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.orangeAccent),
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                    child: DropdownButtonFormField<String>(
+                      isExpanded: true,
+                      value: selectedGoodsType,
+                      items: goodsList.map((goods) {
+                        return DropdownMenuItem<String>(
+                          value: goods,
+                          child: Text(goods),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedGoodsType = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'Goods Type',
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12.0),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            child: Text(
-              'Book Pickup',
-              style: TextStyle(color: Colors.white),
+            SizedBox(height: 16.0),
+            Center(
+              child: Text(
+                'Choose Trucks',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                ),
+              ),
             ),
-          ),
-        ],
+            SizedBox(height: 16.0),
+            for (int index = 0; index < trucks.length; index++)
+              Container(
+                margin: EdgeInsets.only(bottom: 8.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    _showPopup(context, index);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: selectedTruck == trucks[index] ? Colors.grey : Colors.white,
+                    onPrimary: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Column(
+                        children: [
+                          Image.asset(
+                            trucks[index].imagePath,
+                            height: 60.0,
+                            width: 120.0,
+                            fit: BoxFit.cover,
+                          ),
+                          SizedBox(height: 4.0),
+                          Text(
+                            trucks[index].name,
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 8.0),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Price: \$${trucks[index].price.toString()}',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 12,
+                            ),
+                          ),
+                          Text(
+                            'Capacity: ${trucks[index].weightCapacity.toString()} Tons',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                _navigateToConfirmationPage();
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Colors.black,
+                onPrimary: Colors.white,
+              ),
+              child: Text(
+                'Book Pickup',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
